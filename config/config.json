@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "nandang",
+    "password": "lusian123",
+    "database": "skripsi",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "nandang",
+    "password": "lusian123",
+    "database": "skripsi",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "nandang",
+    "password": "lusian123",
+    "database": "skripsi",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}

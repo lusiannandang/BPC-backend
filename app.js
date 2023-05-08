@@ -1,4 +1,4 @@
-const { sequelize } = require("./models");
+const sequelize = require("./config/db");
 const express = require("express");
 const app = express();
 const port = 3000;
@@ -8,9 +8,13 @@ const pembayaranRouter = require("./routes/pembayaranRouter")
 const pengumumanRouter = require("./routes/pengumumanRouter")
 const authRouter = require("./routes/authRouter")
 
-// async function main() {
-//   await sequelize.sync();
-// }
+// sequelize.sync({ force: false }) // force: false akan menghindari penghapusan dan pembuatan ulang tabel jika sudah ada
+//   .then(() => {
+//     console.log('Sinkronisasi database berhasil!');
+//   })
+//   .catch((error) => {
+//     console.error('Gagal melakukan sinkronisasi database:', error);
+//   });
 
 // main();
 app.use((req, res, next) => {

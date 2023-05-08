@@ -1,5 +1,4 @@
-const models = require('../models');
-const User = models.user;
+const { User, Kuisioner, Kelas, Pengumuman } = require("../models/associate");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
@@ -17,25 +16,25 @@ const loginUser = async (req, res) => {
     return;
   }
   if (checkUserPassword == true) {
-    const uuid = user.uuid;
+    const userId = user.id;
     const name = user.name;
     const email = user.email;
     const role = user.role;
     const token = jwt.sign({ userId: user.id }, "secretKey", { expiresIn: "1h" });
-    return res.status(200).json({ uuid, name, email, role, token });
+    return res.status(200).json({ userId, name, email, role, token });
   } else {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
 
 const registerUser = async (req, res) => {
-  const { name,foto, alamat, tempatLahir, tanggalLahir, noHp, email, password, status, role } = req.body;
+  const { name, foto, alamat, tempatLahir, tanggalLahir, noHp, email, password, status, role } = req.body;
   const hashPassword = await bcrypt.hash(password, saltRounds);
 
   try {
     const user = await User.create({
       name: name,
-      foto:foto,
+      foto: foto,
       alamat: alamat,
       tempatLahir: tempatLahir,
       tanggalLahir: tanggalLahir,
@@ -43,7 +42,7 @@ const registerUser = async (req, res) => {
       email: email,
       password: hashPassword,
       status: false,
-      role: role,
+      role: "USER",
     });
     res.status(201).json(user);
   } catch {
@@ -51,4 +50,4 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser,registerUser };
+module.exports = { loginUser, registerUser };

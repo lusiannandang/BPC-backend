@@ -1,29 +1,18 @@
-"use strict";
-const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
-  class kelas extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-      this.belongsTo(models.User, {foreignKey: 'userId'});
-    }
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db'); // mengimport instance Sequelize yang telah dikonfigurasi
+
+const Kelas = sequelize.define('Kelas', {
+  uuid: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+  },
+  nama: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  userId:{
+    type: DataTypes.INTEGER
   }
-  kelas.init(
-    {
-      uuid: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-      },
-      name: DataTypes.STRING,
-    },
-    {
-      sequelize,
-      modelName: "kelas",
-    }
-  );
-  return kelas;
-};
+});
+
+module.exports = Kelas;

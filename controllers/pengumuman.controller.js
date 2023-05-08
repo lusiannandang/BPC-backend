@@ -1,5 +1,4 @@
-const models = require('../models');
-const Pengumuman = models.pengumuman;
+const { User, Kuisioner, Kelas, Pengumuman } = require("../models/associate");
 const formidable = require("formidable");
 const cloudinary = require("../config/cloudinary.js");
 
@@ -34,7 +33,7 @@ const createPengumuman = async (req, res) => {
 const getAllPengumuman = async (req, res) => {
   try {
     const result = await Pengumuman.findAll();
-    res.status(200).json({ data: result });
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "failed to get all data" });
   }
@@ -43,7 +42,7 @@ const getAllPengumumanById = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await Pengumuman.findByPk(id);
-    res.status(200).json({ data: result });
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "failed to get data" });
   }
@@ -62,7 +61,7 @@ const updatePengumuman = async (req, res) => {
       .then((result) => {
         if (result == null) {
           res.status(404).json({
-            message: 'Item not found',
+            message: "Item not found",
           });
           return;
         }
@@ -76,7 +75,7 @@ const updatePengumuman = async (req, res) => {
           Pengumuman.update(fields, { where: { id: req.params.id } })
             .then((result) => {
               res.status(200).json({
-                message: 'Item successfully updated',
+                message: "Item successfully updated",
               });
             })
             .catch((err) => {

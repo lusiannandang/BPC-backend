@@ -1,6 +1,5 @@
-const models = require("../models");
-const Kelas = models.kelas;
-let csvToJson = require("convert-csv-to-json");
+const { User, Kuisioner, Kelas, Pengumuman } = require("./models/associate");
+const csvToJson = require("convert-csv-to-json");
 
 const addKelas = async (req, res) => {
   const { lamaLatihan, jumlahPrestasi, waktuGayaBebas, gayaDikuasai, jarakLatihan } = req.body;
@@ -8,10 +7,11 @@ const addKelas = async (req, res) => {
   // Fungsi untuk melakukan prediksi menggunakan decision tree
   // Definisi data
 
-  let json = csvToJson.getJsonFromCsv("Book1.csv");
+  let json = csvToJson.getJsonFromCsv("./Dataset.csv");
+  // console.log(json);
 
   const trainingData = json;
-  console.log(trainingData);
+  // console.log(trainingData);
   // Definisi atribut-atribut
   const attributes = ["lamaLatihan", "jumlahPrestasi", "waktuGayaBebas", "gayaDikuasai", "jarakLatihan"];
 
@@ -119,87 +119,67 @@ const addKelas = async (req, res) => {
 
   // const prediction = predict(dataToPredict, decisionTree);
   // console.log("Hasil prediksi kelas: ", prediction);
+  const userFind = await User.findByPk(req.params.id);
+  console.log(userFind);
+  if (userFind) {
+    try {
+      // Contoh data yang ingin diprediksi
+      const dataToPredict = {
+        lamaLatihan: lamaLatihan,
+        jumlahPrestasi: jumlahPrestasi,
+        waktuGayaBebas: waktuGayaBebas,
+        gayaDikuasai: gayaDikuasai,
+        jarakLatihan: jarakLatihan,
+      };
 
-  try {
-    // Contoh data yang ingin diprediksi
-    const dataToPredict = {
-      lamaLatihan: lamaLatihan,
-      jumlahPrestasi: jumlahPrestasi,
-      waktuGayaBebas: waktuGayaBebas,
-      gayaDikuasai: gayaDikuasai,
-      jarakLatihan: jarakLatihan,
-    };
+      // Melakukan prediksi menggunakan decision tree
+      const prediction = predict(dataToPredict, decisionTree);
 
-    // Melakukan prediksi menggunakan decision tree
-    const prediction = predict(dataToPredict, decisionTree);
+      // Mengisi field Kelas.userId dengan Users.id yang sesuai
+      const hasil = await Kelas.create({
+        nama: prediction,
+        userId: req.params.id,
+      });
 
-    const hasil = await Kelas.create({
-      userId: 1,
-      name: prediction
-    });
-
-    // Mengirimkan hasil prediksi sebagai response
-    res.status(200).json(hasil);
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
+      // Mengirimkan hasil prediksi sebagai response
+      res.status(200).json(hasil);
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  } else {
+    res.status(500).json({ msg: "Tidak ada" });
   }
 };
 
-// const createKelas = async (req, res) => {
-//   const { kelas } = req.body;
-
-//   try {
-//     let hasil;
-//     hasil = await Kelas.create({
-//         kelas: kelas,
-//       userId: req.userId
-//     });
-//     res.status(201).json({
-//       message: "Kelas created",
-//     });
-//   } catch {
-//     res.status(500).json({ message: "Failed create kelas" });
-//   }
-// };
 
 const getAllKelas = async (req, res) => {
   try {
-    const result = await Kelas.findAll();
-    res.status(200).json({ data: result });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
+    const result = await Kelas.findAll({
+      include: [{
+        model: User,
+        as: "user"
+      }]
+    });
+    return res.json(result);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json(err);
   }
 };
 
-// const getAllKelasById = async (req, res) => {
-//   try {
-//     const result = await Kelas.findByPk(req.params.id);
-//     res.status(200).json({ data: result });
-//   } catch (error) {
-//     res.status(500).json({ msg: error.message });
-//   }
-// };
 
-// const updateKelas = async (req, res) => {};
+const getKelasById = async (req, res) => {
+  const userId = req.params.id;
 
-// const deleteKelas = async (req, res) => {
-//     const kelas = await Kelas.findOne({
-//         where: {
-//           uuid: req.params.id,
-//         },
-//       });
-//       if (!kelas) return res.status(404).json({ msg: "kelas tidak ditemukan" });
-//       try {
-//         await Kelas.destroy({
-//           where: {
-//             id: user.id,
-//           },
-//         });
-//         res.status(200).json({ msg: "Kelas Deleted" });
-//       } catch (error) {
-//         res.status(400).json({ msg: error.message });
-//       }
-// };
-
-// module.exports = { createKelas, getAllKelas, getAllKelasById, updateKelas, deleteKelas };
-module.exports = { addKelas, getAllKelas };
+  try {
+    const result = await Kelas.findAll({
+      where: { userId: userId },
+      include: [{ model: User, as: "user" }],
+    });
+    return res.json(result);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json(err);
+  }
+};
+module.exports = { addKelas, getAllKelas, getKelasById };

@@ -1,34 +1,37 @@
-"use strict";
-const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
-  class pembayaran extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate({ User }) {
-      // define association here
-      this.belongsTo(User);
-    }
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db'); // mengimport instance Sequelize yang telah dikonfigurasi
+const User = require('./user'); // mengimport model User
+
+const Pembayaran = sequelize.define('Pembayaran', {
+  uuid: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+  },
+  jumlah: DataTypes.INTEGER,
+  image: DataTypes.STRING,
+  status: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  tanggal: {
+    type: DataTypes.DATE,
+    allowNull: false
+  },
+  bulan: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: new Date().getMonth() + 1 // Nilai awal = bulan saat ini
+  },
+  tahun: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: new Date().getFullYear() // Nilai awal = tahun saat ini
+  },
+  userId:{
+    type: DataTypes.INTEGER
   }
-  pembayaran.init(
-    {
-      uuid: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-      },
-      jumlah: DataTypes.INTEGER,
-      image: DataTypes.STRING,
-      status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-      },
-    },
-    {
-      sequelize,
-      modelName: "pembayaran",
-    }
-  );
-  return pembayaran;
-};
+});
+
+
+// Asosiasi Pembayaran milik User
+module.exports = Pembayaran;

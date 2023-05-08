@@ -1,18 +1,15 @@
-const models = require('../models');
-const User = models.user;
-const Kelas = models.kelas;
-const Pembayaran = models.pembayaran;
+const { User, Pembayaran, Kelas } = require("../models/associate");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;
 
 const createUser = async (req, res) => {
-  const { name,foto, alamat, tempatLahir, tanggalLahir, noHp, email, password, status, role } = req.body;
+  const { name, foto, alamat, tempatLahir, tanggalLahir, noHp, email, password, status, role } = req.body;
   const hashPassword = await bcrypt.hash(password, saltRounds);
 
   try {
     const user = await User.create({
       name: name,
-      foto:foto,
+      foto: foto,
       alamat: alamat,
       tempatLahir: tempatLahir,
       tanggalLahir: tanggalLahir,
@@ -20,7 +17,7 @@ const createUser = async (req, res) => {
       email: email,
       password: hashPassword,
       status: false,
-      role: role,
+      role: 'USER',
     });
     res.status(201).json(user);
   } catch {
@@ -30,17 +27,18 @@ const createUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const result = await User.findAll();
-    res.status(200).json({ data: result });
+    const result = await User.findAll({include: [{ model: Kelas }, { model: Pembayaran,  as: 'pembayaran' }]});
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ msg: error.message });
   }
 };
 
 const getAllUserById = async (req, res) => {
-  const uuid = req.params.uuid;
+  const userId = req.params.id;
+  console.log(userId);
   try {
-    const result = await User.findOne({where: {uuid}, include: "pembayaran"});
+    const result = await User.findByPk(userId, { include: [{ model: Kelas }, { model: Pembayaran,  as: 'pembayaran' }] });
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ msg: error.message });
@@ -48,68 +46,43 @@ const getAllUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { name, alamat, tempatLahir, tanggalLahir, noHp, email, password, status, role } = req.body;
-  const hashPassword = await bcrypt.hash(password, saltRounds);
+  const { name, alamat, tempatLahir, tanggalLahir, noHp, status, role } = req.body;
 
-  const userFind = User.findByPk(req.params.id, );
-  if(userFind){
-    try{
-      let user = {};
-    user = await User.create({
-      name: name,
-      alamat: alamat,
-      tempatLahir: tempatLahir,
-      tanggalLahir: tanggalLahir,
-      noHp: noHp,
-      email: email,
-      password: hashPassword,
-      status: false,
-      role: role,
-    });
-    res.status(201).json({
-      message: "Registered user successfully",
-      data: {
-        id: user.uuid,
-        name: user.name,
-        alamat: user.alamat,
-        tempatLahir: user.tempatLahir,
-        noHp: user.noHp,
-        email: user.email,
-        password: user.password,
-        status: user.status,
-        role: user.role,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-    });
-    } 
-    catch{
+  const userFind = await User.findByPk(req.params.id);
+  if (userFind) {
+    try {
+      let user = await User.update({
+        name: name,
+        alamat: alamat,
+        tempatLahir: tempatLahir,
+        tanggalLahir: tanggalLahir,
+        noHp: noHp,
+        status: status,
+      }, {
+        where: {
+          id: req.params.id
+        }});
+      res.status(201).json(user);
+    } catch(error) {
       res.status(500).json({ msg: error.message });
     }
-  }else{
+  } else {
     res.status(500).json({ msg: "Tidak ada" });
   }
-
 };
-
 
 const deleteUser = async (req, res) => {
-  const user = await User.findOne({
-    where: {
-      uuid: req.params.id,
-    },
-  });
-  if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
   try {
-    await User.destroy({
-      where: {
-        id: user.id,
-      },
+    const { id } = req.params;
+    await User.destroy({ where: { id: id } });
+
+    res.status(200).json({
+      message: "Item deleted",
     });
-    res.status(200).json({ msg: "User Deleted" });
   } catch (error) {
-    res.status(400).json({ msg: error.message });
+    res.status(500).json({ message: "failed to delete item" });
   }
 };
+
 
 module.exports = { createUser, getAllUsers, getAllUserById, updateUser, deleteUser };

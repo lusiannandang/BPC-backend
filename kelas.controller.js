@@ -120,10 +120,8 @@ const addKelas = async (req, res) => {
   // const prediction = predict(dataToPredict, decisionTree);
   // console.log("Hasil prediksi kelas: ", prediction);
   const userFind = await User.findByPk(req.params.id);
-  console.log(userFind);
   if (userFind) {
     try {
-      // Contoh data yang ingin diprediksi
       const dataToPredict = {
         lamaLatihan: lamaLatihan,
         jumlahPrestasi: jumlahPrestasi,
@@ -135,13 +133,11 @@ const addKelas = async (req, res) => {
       // Melakukan prediksi menggunakan decision tree
       const prediction = predict(dataToPredict, decisionTree);
 
-      // Mengisi field Kelas.userId dengan Users.id yang sesuai
       const hasil = await Kelas.create({
         nama: prediction,
         userId: req.params.id,
       });
 
-      // Mengirimkan hasil prediksi sebagai response
       res.status(200).json(hasil);
     } catch (error) {
       res.status(500).json({ msg: error.message });

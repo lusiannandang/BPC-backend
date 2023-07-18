@@ -6,7 +6,6 @@ const addKelas = async (req, res) => {
 
   // Fungsi untuk melakukan prediksi menggunakan decision tree
   // Definisi data
-
   let json = csvToJson.getJsonFromCsv("./Dataset.csv");
   // console.log(json);
 
@@ -17,9 +16,9 @@ const addKelas = async (req, res) => {
 
   // Fungsi untuk menghitung entropy
   function calculateEntropy(data, targetAttribute) {
-    const target = data.map((row) => row[targetAttribute]);
+    const target = data.map((row) => row[targetAttribute]); //ambil data tiap dataset
     const total = target.length;
-    const counts = target.reduce((acc, val) => {
+    const counts = target.reduce((acc, val) => { //menghitung kemunculan tiap nilai taget variabel
       acc[val] = (acc[val] || 0) + 1;
       return acc;
     }, {});
@@ -30,30 +29,30 @@ const addKelas = async (req, res) => {
 
   // Fungsi untuk menghitung gain information
   function calculateInformationGain(data, attribute, targetAttribute) {
-    const attributeValues = [...new Set(data.map((row) => row[attribute]))];
+    const attributeValues = [...new Set(data.map((row) => row[attribute]))]; //nilai yang mungkin muncul pada atribut yg diberikan
     const total = data.length;
-    const entropyParent = calculateEntropy(data, targetAttribute);
+    const entropyParent = calculateEntropy(data, targetAttribute); //entropy total
 
     let entropyChildren = 0;
-    attributeValues.forEach((val) => {
+    attributeValues.forEach((val) => { //menghitung entropy data pada atribut yang sama
       const subsetData = data.filter((row) => row[attribute] === val);
       const subsetEntropy = calculateEntropy(subsetData, targetAttribute);
       const subsetWeight = subsetData.length / total;
       entropyChildren += subsetEntropy * subsetWeight;
     });
 
-    const informationGain = entropyParent - entropyChildren;
+    const informationGain = entropyParent - entropyChildren; //menghitung gain
     return informationGain;
   }
 
   // Fungsi untuk membangun decision tree
   function buildDecisionTree(data, attributes, targetAttribute = "kelas") {
-    const uniqueClasses = [...new Set(data.map((row) => row[targetAttribute]))];
-    if (uniqueClasses.length === 1) {
+    const uniqueClasses = [...new Set(data.map((row) => row[targetAttribute]))]; //nilai-nilai unik dari target variabel pada dataset
+    if (uniqueClasses.length === 1) { //jika 1 maka keputusan hanya akan memiliki satu simpul dengan nilai kelas tersebut
       return { kelas: uniqueClasses[0] };
     }
 
-    if (attributes.length === 0) {
+    if (attributes.length === 0) { //jika kosong tidak ada lagi atribut yang dapat digunakan untuk membangun pohon keputusan
       const target = data.map((row) => row[targetAttribute]);
       const counts = target.reduce((acc, val) => {
         acc[val] = (acc[val] || 0) + 1;
@@ -63,7 +62,7 @@ const addKelas = async (req, res) => {
       return { kelas: majorityClass };
     }
 
-    const gains = attributes.map((attribute) => {
+    const gains = attributes.map((attribute) => { //menghitung gain jika masih ada atribut yg digunakan
       const gain = calculateInformationGain(data, attribute, targetAttribute);
       return { attribute, gain };
     });
@@ -108,17 +107,7 @@ const addKelas = async (req, res) => {
     return predict(data, nextTree);
   }
 
-  // Contoh penggunaan model decision tree
-  // const dataToPredict = {
-  //   lamaLatihan: "> 1 tahun",
-  //   jumlahPrestasi: "0",
-  //   waktuGayaBebas: ">1 menit",
-  //   gayaDikuasai: "03-Apr",
-  //   jarakLatihan: "Memendek",
-  // };
-
-  // const prediction = predict(dataToPredict, decisionTree);
-  // console.log("Hasil prediksi kelas: ", prediction);
+  
   const userFind = await User.findByPk(req.params.id);
   if (userFind) {
     try {
@@ -140,7 +129,7 @@ const addKelas = async (req, res) => {
 
       res.status(200).json(hasil);
     } catch (error) {
-      res.status(500).json({ msg: error.message });
+      res.status(500).json({ msg: "error.message" });
     }
   } else {
     res.status(500).json({ msg: "Tidak ada" });
@@ -152,8 +141,7 @@ const getAllKelas = async (req, res) => {
   try {
     const result = await Kelas.findAll({
       include: [{
-        model: User,
-        as: "user"
+        model: User
       }]
     });
     return res.json(result);
@@ -170,7 +158,7 @@ const getKelasById = async (req, res) => {
   try {
     const result = await Kelas.findAll({
       where: { userId: userId },
-      include: [{ model: User, as: "user" }],
+      include: [{ model: User}],
     });
     return res.json(result);
   } catch (err) {
@@ -178,4 +166,32 @@ const getKelasById = async (req, res) => {
     return res.status(500).json(err);
   }
 };
-module.exports = { addKelas, getAllKelas, getKelasById };
+
+const getUsersByKelas = async (req, res) => {
+  const { namaKelas } = req.params;
+
+  if (namaKelas === "Kelas tidak ditemukan") {
+    return res.status(404).json({ msg: "Kelas tidak ditemukan" });
+  }
+
+  try {
+    const kelas = await Kelas.findOne({
+      where: { nama: namaKelas },
+    });
+
+    if (kelas) {
+      const users = await User.findAll({
+        where: { id: kelas.userId },
+      });
+
+      return res.json(users);
+    } else {
+      return res.status(404).json({ msg: "Kelas tidak ditemukan" });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json(err);
+  }
+};
+
+module.exports = { addKelas, getAllKelas, getKelasById, getUsersByKelas };

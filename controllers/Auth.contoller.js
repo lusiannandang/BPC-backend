@@ -1,4 +1,4 @@
-const { User, Kuisioner, Kelas, Pengumuman } = require("../models/associate");
+const { User } = require("../models/associate");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const saltRounds = 12;

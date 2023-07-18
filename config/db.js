@@ -1,13 +1,10 @@
 const { Sequelize } = require('sequelize');
 
-// Konfigurasi koneksi database
 const sequelize = new Sequelize('skripsi', 'nandang', 'lusian123', {
-  host: 'localhost', // alamat host database
-  dialect: 'postgres', // jenis database yang digunakan
-  // opsi lainnya
+  host: 'localhost', 
+  dialect: 'postgres', 
 });
 
-// Tes koneksi ke database
 sequelize
   .authenticate()
   .then(() => {

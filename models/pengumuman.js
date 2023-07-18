@@ -7,7 +7,7 @@ const Pengumuman = sequelize.define("Pengumuman", {
     defaultValue: DataTypes.UUIDV4,
   },
   judul: DataTypes.STRING,
-  isi: DataTypes.STRING,
+  isi: DataTypes.TEXT,
   image: DataTypes.STRING,
 });
 

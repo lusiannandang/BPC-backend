@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); // mengimport instance Sequelize yang telah dikonfigurasi
-const User = require('./user'); // mengimport model User
 
 const Pembayaran = sequelize.define('Pembayaran', {
   uuid: {
@@ -20,12 +19,12 @@ const Pembayaran = sequelize.define('Pembayaran', {
   bulan: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: new Date().getMonth() + 1 // Nilai awal = bulan saat ini
+    defaultValue: new Date().getMonth() + 1
   },
   tahun: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: new Date().getFullYear() // Nilai awal = tahun saat ini
+    defaultValue: new Date().getFullYear() 
   },
   userId:{
     type: DataTypes.INTEGER
@@ -33,5 +32,4 @@ const Pembayaran = sequelize.define('Pembayaran', {
 });
 
 
-// Asosiasi Pembayaran milik User
 module.exports = Pembayaran;

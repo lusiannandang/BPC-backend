@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // mengimport instance Sequelize yang telah dikonfigurasi
-const Pembayaran = require('./pembayaran'); // mengimport model Pembayaran
-const Kelas = require('./kelas'); // mengimport model Kelas
+const sequelize = require('../config/db'); 
 
 const User = sequelize.define('User', {
   uuid: {

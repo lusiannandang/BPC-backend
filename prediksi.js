@@ -16,7 +16,7 @@ function calculateEntropy(data, targetAttribute) {
     return acc;
   }, {});
   const probabilities = Object.values(counts).map((count) => count / total);
-  const entropy = probabilities.reduce((sum, prob) => sum - prob * Math.log2(prob), 0);
+  const entropy = probabilities.reduce((sum, prob) => sum - prob *  Math.log2(prob), 0);
   return entropy;
 }
 
@@ -60,6 +60,11 @@ function buildDecisionTree(data, attributes, targetAttribute = "kelas") {
     return { attribute, gain };
   });
 
+  console.log("Entropy:");
+  gains.forEach((gain) => {
+    console.log(`${gain.attribute}: Entropy=${calculateEntropy(data, targetAttribute)}`);
+  });
+  // , Gain=${gain.gain}
   const bestAttribute = gains.reduce((a, b) => (a.gain > b.gain ? a : b)).attribute;
   const attributeValues = [...new Set(data.map((row) => row[bestAttribute]))];
   const tree = { attribute: bestAttribute, children: {} };
@@ -75,8 +80,9 @@ function buildDecisionTree(data, attributes, targetAttribute = "kelas") {
 
 // Membangun decision tree dari data training
 const decisionTree = buildDecisionTree(trainingData, attributes);
+console.log("Decision Tree:", decisionTree);
 
-// Fungsi untuk melakukan prediksi menggunakan decision tree
+
 // Fungsi untuk melakukan prediksi menggunakan decision tree
 function predict(data, tree, targetAttribute) {
   if (tree.hasOwnProperty("kelas")) {
@@ -105,98 +111,11 @@ const targetAttribute = "kelas"; // Atribut target yang digunakan
 
 const dataToPredict = {
   lamaLatihan: "> 1 tahun",
-  jumlahPrestasi: "0",
-  waktuGayaBebas: "< 1 menit",
-  gayaDikuasai: "'3-4'",
-  jarakLatihan: "Memanjang",
+ jumlahPrestasi: "0",
+ waktuGayaBebas: "< 1 menit",
+ gayaDikuasai: "3-4'",
+ jarakLatihan: "Memanjang"
 };
 
 const prediction = predict(dataToPredict, decisionTree, targetAttribute);
 console.log("Prediction:", prediction);
-
-function calculateAccuracy(data, tree, targetAttribute) {
-  let correctCount = 0;
-  for (let i = 0; i < data.length; i++) {
-    const instance = data[i];
-    const prediction = predict(instance, tree, targetAttribute);
-    if (prediction === instance[targetAttribute]) {
-      correctCount++;
-    }
-  }
-  const accuracy = correctCount / data.length;
-  return accuracy;
-}
-
-// Contoh penggunaan
-const testData = [
-  { lamaLatihan: "> 1 tahun", jumlahPrestasi: "> 5", waktuGayaBebas: "< 1 menit", gayaDikuasai: "'3-4'", jarakLatihan: "Memanjang", kelas: "Prestasi" },
-  { lamaLatihan: "> 1 tahun", jumlahPrestasi: "> 5", waktuGayaBebas: "< 1 menit", gayaDikuasai: "'3-4'", jarakLatihan: "Memanjang", kelas: "Prestasi" },
-  {
-    lamaLatihan: "4 bulan – 1 tahun",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: ">1 menit",
-    gayaDikuasai: "3-4'",
-    jarakLatihan: "Memendek",
-    kelas: "Semi Prestasi",
-  },
-  {
-    lamaLatihan: "0 – 4 bulan",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: "0 (kosong)",
-    gayaDikuasai: "0",
-    jarakLatihan: "0 (kosong)",
-    kelas: "Pemula",
-  },
-  {
-    lamaLatihan: "> 1 tahun",
-    jumlahPrestasi: "1 – 5",
-    waktuGayaBebas: "< 1 menit",
-    gayaDikuasai: "3-4'",
-    jarakLatihan: "Memanjang",
-    kelas: "Prestasi",
-  },
-  {
-    lamaLatihan: "0 – 4 bulan",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: "0 (kosong)",
-    gayaDikuasai: "1-2'",
-    jarakLatihan: "0 (kosong)",
-    kelas: "Pemula",
-  },
-  {
-    lamaLatihan: "4 bulan – 1 tahun",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: ">1 menit",
-    gayaDikuasai: "3-4'",
-    jarakLatihan: "Memendek",
-    kelas: "Semi Prestasi",
-  }, // Tambahkan data pengujian lainnya di sini
-  {
-    lamaLatihan: "> 1 tahun",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: ">1 menit",
-    gayaDikuasai: "3-4'",
-    jarakLatihan: "Memendek",
-    kelas: "Semi Prestasi",
-  },
-  {
-    lamaLatihan: "0 – 4 bulan",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: "0 (kosong)",
-    gayaDikuasai: "1-2'",
-    jarakLatihan: "0 (kosong)",
-    kelas: "Pemula",
-  },
-  {
-    lamaLatihan: "> 1 tahun",
-    jumlahPrestasi: "0",
-    waktuGayaBebas: "< 1 menit",
-    gayaDikuasai: "3-4'",
-    jarakLatihan: "Memanjang",
-    kelas: "Prestasi",
-  }, // Tambahkan data pengujian lainnya di sini
-];
-
-const accuracy = calculateAccuracy(testData, decisionTree, targetAttribute);
-const accuracyPercentage = accuracy * 100;
-console.log("Accuracy:", accuracyPercentage.toFixed(2) + "%");

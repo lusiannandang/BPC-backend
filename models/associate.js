@@ -3,10 +3,11 @@ const Kelas = require("./kelas");
 const Pembayaran = require("./pembayaran");
 const Pengumuman = require("./pengumuman");
 
-User.belongsTo(Kelas);
-Kelas.hasMany(User, {as: 'user'});
+User.hasMany(Kelas, { foreignKey: "userId" });
+User.hasMany(Pembayaran, { foreignKey: "userId" });
 
-User.hasMany(Pembayaran, { as: 'pembayaran' });
-Pembayaran.belongsTo(User, { as: 'user' });
+
+Pembayaran.belongsTo(User, { foreignKey: "userId" });
+Kelas.belongsTo(User, { foreignKey: "userId" });
 
 module.exports = { User, Pembayaran, Kelas, Pengumuman };

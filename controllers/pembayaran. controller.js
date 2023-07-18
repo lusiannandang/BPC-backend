@@ -11,7 +11,6 @@ const createPembayaran = async (req, res) => {
     return res.status(404).json({ msg: "User not found" });
   }
 
-  // Cek apakah user telah melakukan pembayaran pada bulan ini
   const existingPayment = await Pembayaran.findOne({
     where: {
       userId: userId,
@@ -36,7 +35,7 @@ const createPembayaran = async (req, res) => {
         next(err);
         return;
       }
-      // Buat pembayaran baru
+
       const pembayaran = Pembayaran.create({
         jumlah: fields.jumlah,
         image: result.secure_url,
@@ -54,7 +53,7 @@ const createPembayaran = async (req, res) => {
 
 const getAllPembayaran = async (req, res) => {
   try {
-    const result = await Pembayaran.findAll({ include: [{ model: User, as: "user" }] });
+    const result = await Pembayaran.findAll({ include: [{ model: User}] });
     return res.json(result);
   } catch (err) {
     console.log(err);
@@ -68,11 +67,11 @@ const getAllPembayaranById = async (req, res) => {
   try {
     const result = await Pembayaran.findAll({
       where: { userId: userId },
-      include: [{ model: User, as: "user" }],
+      include: [{ model: User}],
     });
 
     if (result.length === 0) {
-      return res.status(500).send();
+      return res.json(null);
     } else {
       return res.json(result);
     }    
@@ -84,7 +83,7 @@ const getAllPembayaranById = async (req, res) => {
 
 const updatePembayaran = async (req, res, next) => {
   const userId = req.params.id;
-  const pembayaranId = req.params.pembayaranId; // ubah params menjadi params.pembayaranId
+  const pembayaranId = req.params.pembayaranId;
   console.log(userId)
   console.log(pembayaranId)
   const form = formidable({});
@@ -94,7 +93,7 @@ const updatePembayaran = async (req, res, next) => {
     return res.status(404).json({ msg: "User not found" });
   }
 
-  // Cek apakah pembayaran ditemukan
+  
   const existingPayment = await Pembayaran.findOne({
     where: {
       id: pembayaranId,
@@ -119,11 +118,11 @@ const updatePembayaran = async (req, res, next) => {
           next(err);
           return;
         }
-        // Update data pembayaran
+        
         existingPayment.update({
           jumlah: fields.jumlah,
           image: result.secure_url,
-          status: fields.status, // ubah string "true" menjadi boolean true
+          status: fields.status, 
           tanggal: new Date(),
           bulan: new Date().getMonth() + 1,
           tahun: new Date().getFullYear(),
@@ -132,10 +131,10 @@ const updatePembayaran = async (req, res, next) => {
         });
       });
     } else {
-      // Update data pembayaran
+      
       existingPayment.update({
         jumlah: fields.jumlah,
-        status: fields.status, // ubah string "true" menjadi boolean true
+        status: fields.status, 
         tanggal: new Date(),
         bulan: new Date().getMonth() + 1,
         tahun: new Date().getFullYear(),

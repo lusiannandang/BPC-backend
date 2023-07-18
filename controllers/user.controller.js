@@ -17,7 +17,7 @@ const createUser = async (req, res) => {
       email: email,
       password: hashPassword,
       status: false,
-      role: 'USER',
+      role: "USER",
     });
     res.status(201).json(user);
   } catch {
@@ -27,7 +27,7 @@ const createUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const result = await User.findAll({include: [{ model: Kelas }, { model: Pembayaran,  as: 'pembayaran' }]});
+    const result = await User.findAll({ where: { role: "USER" }, include: [{ model: Kelas }, { model: Pembayaran }] });
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ msg: error.message });
@@ -38,7 +38,7 @@ const getAllUserById = async (req, res) => {
   const userId = req.params.id;
   console.log(userId);
   try {
-    const result = await User.findByPk(userId, { include: [{ model: Kelas }, { model: Pembayaran,  as: 'pembayaran' }] });
+    const result = await User.findOne({ include: [{ model: Kelas }, { model: Pembayaran }], where: { id: userId } });
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ msg: error.message });
@@ -51,19 +51,23 @@ const updateUser = async (req, res) => {
   const userFind = await User.findByPk(req.params.id);
   if (userFind) {
     try {
-      let user = await User.update({
-        name: name,
-        alamat: alamat,
-        tempatLahir: tempatLahir,
-        tanggalLahir: tanggalLahir,
-        noHp: noHp,
-        status: status,
-      }, {
-        where: {
-          id: req.params.id
-        }});
+      let user = await User.update(
+        {
+          name: name,
+          alamat: alamat,
+          tempatLahir: tempatLahir,
+          tanggalLahir: tanggalLahir,
+          noHp: noHp,
+          status: status,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
       res.status(201).json(user);
-    } catch(error) {
+    } catch (error) {
       res.status(500).json({ msg: error.message });
     }
   } else {
@@ -83,6 +87,5 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "failed to delete item" });
   }
 };
-
 
 module.exports = { createUser, getAllUsers, getAllUserById, updateUser, deleteUser };
